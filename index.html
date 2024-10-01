@@ -1,0 +1,681 @@
+<html>
+
+<head>
+<script type="text/javascript">
+// <![CDATA[
+var colours=new Array('#f00', '#f06', '#f0f', '#f6f', '#f39', '#f9c'); // colours of the hearts
+var minisize=16; // smallest size of hearts in pixels
+var maxisize=28; // biggest size of hearts in pixels
+var hearts=66; // maximum number of hearts on screen
+var over_or_under="over"; // set to "over" for hearts to always be on top, or "under" to allow them to float behind other objects
+
+/*****************************
+*JavaScript Love Heart Cursor*
+*  (c)2013+ mf2fm web-design *
+*   http://www.mf2fm.com/rv  *
+*  DON'T EDIT BELOW THIS BOX *
+*****************************/
+var x=ox=400;
+var y=oy=300;
+var swide=800;
+var shigh=600;
+var sleft=sdown=0;
+var herz=new Array();
+var herzx=new Array();
+var herzy=new Array();
+var herzs=new Array();
+var kiss=false;
+
+if (typeof('addRVLoadEvent')!='function') function addRVLoadEvent(funky) {
+  var oldonload=window.onload;
+  if (typeof(oldonload)!='function') window.onload=funky;
+  else window.onload=function() {
+    if (oldonload) oldonload();
+    funky();
+  }
+}
+
+addRVLoadEvent(mwah);
+
+function mwah() { if (document.getElementById) {
+  var i, heart;
+  for (i=0; i<hearts; i++) {
+    heart=createDiv("auto", "auto");
+    heart.style.visibility="hidden";
+	heart.style.zIndex=(over_or_under=="over")?"1001":"0";
+    heart.style.color=colours[i%colours.length];
+	heart.style.pointerEvents="none";
+    if (navigator.appName=="Microsoft Internet Explorer") heart.style.filter="alpha(opacity=75)";
+    else heart.style.opacity=0.75;
+    heart.appendChild(document.createTextNode(String.fromCharCode(9829)));
+    document.body.appendChild(heart);
+    herz[i]=heart;
+	herzy[i]=false;
+  }
+  set_scroll();
+  set_width();
+  herzle();
+}}
+
+function herzle() {
+  var c;
+  if (Math.abs(x-ox)>1 || Math.abs(y-oy)>1) {
+    ox=x;
+    oy=y;
+    for (c=0; c<hearts; c++) if (herzy[c]===false) {
+	  herz[c].firstChild.nodeValue=String.fromCharCode(9829);
+      herz[c].style.left=(herzx[c]=x-minisize/2)+"px";
+      herz[c].style.top=(herzy[c]=y-minisize)+"px";
+      herz[c].style.fontSize=minisize+"px";
+	  herz[c].style.fontWeight='normal';
+      herz[c].style.visibility='visible';
+      herzs[c]=minisize;
+      break;
+    }
+  }
+  for (c=0; c<hearts; c++) if (herzy[c]!==false) blow_me_a_kiss(c);
+  setTimeout("herzle()", 40);
+}
+
+document.onmousedown=pucker;
+document.onmouseup=function(){clearTimeout(kiss);};
+
+function pucker() {
+  ox=-1;
+  oy=-1;
+  kiss=setTimeout('pucker()', 100);
+}
+
+function blow_me_a_kiss(i) {
+  herzy[i]-=herzs[i]/minisize+i%2;
+  herzx[i]+=(i%5-2)/5;
+  if (herzy[i]<sdown-herzs[i] || herzx[i]<sleft-herzs[i] || herzx[i]>sleft+swide-herzs[i]) {
+    herz[i].style.visibility="hidden";
+    herzy[i]=false;
+  }
+  else if (herzs[i]>minisize+2 && Math.random()<.5/hearts) break_my_heart(i);
+  else {
+    if (Math.random()<maxisize/herzy[i] && herzs[i]<maxisize) herz[i].style.fontSize=(++herzs[i])+"px";
+    herz[i].style.top=herzy[i]+"px";
+    herz[i].style.left=herzx[i]+"px";
+  }
+}
+
+function break_my_heart(i) {
+  var t;
+  herz[i].firstChild.nodeValue=String.fromCharCode(9676);
+  herz[i].style.fontWeight='bold';
+  herzy[i]=false;
+  for (t=herzs[i]; t<=maxisize; t++) setTimeout('herz['+i+'].style.fontSize="'+t+'px"', 60*(t-herzs[i]));
+  setTimeout('herz['+i+'].style.visibility="hidden";', 60*(t-herzs[i]));
+}
+
+document.onmousemove=mouse;
+function mouse(e) {
+  if (e) {
+    y=e.pageY;
+    x=e.pageX;
+  }
+  else {
+    set_scroll();
+    y=event.y+sdown;
+    x=event.x+sleft;
+  }
+}
+
+window.onresize=set_width;
+function set_width() {
+  var sw_min=999999;
+  var sh_min=999999;
+  if (document.documentElement && document.documentElement.clientWidth) {
+    if (document.documentElement.clientWidth>0) sw_min=document.documentElement.clientWidth;
+    if (document.documentElement.clientHeight>0) sh_min=document.documentElement.clientHeight;
+  }
+  if (typeof(self.innerWidth)=='number' && self.innerWidth) {
+    if (self.innerWidth>0 && self.innerWidth<sw_min) sw_min=self.innerWidth;
+    if (self.innerHeight>0 && self.innerHeight<sh_min) sh_min=self.innerHeight;
+  }
+  if (document.body.clientWidth) {
+    if (document.body.clientWidth>0 && document.body.clientWidth<sw_min) sw_min=document.body.clientWidth;
+    if (document.body.clientHeight>0 && document.body.clientHeight<sh_min) sh_min=document.body.clientHeight;
+  }
+  if (sw_min==999999 || sh_min==999999) {
+    sw_min=800;
+    sh_min=600;
+  }
+  swide=sw_min;
+  shigh=sh_min;
+}
+
+window.onscroll=set_scroll;
+function set_scroll() {
+  if (typeof(self.pageYOffset)=='number') {
+    sdown=self.pageYOffset;
+    sleft=self.pageXOffset;
+  }
+  else if (document.body && (document.body.scrollTop || document.body.scrollLeft)) {
+    sdown=document.body.scrollTop;
+    sleft=document.body.scrollLeft;
+  }
+  else if (document.documentElement && (document.documentElement.scrollTop || document.documentElement.scrollLeft)) {
+    sleft=document.documentElement.scrollLeft;
+    sdown=document.documentElement.scrollTop;
+  }
+  else {
+    sdown=0;
+    sleft=0;
+  }
+}
+
+function createDiv(height, width) {
+  var div=document.createElement("div");
+  div.style.position="absolute";
+  div.style.height=height;
+  div.style.width=width;
+  div.style.overflow="hidden";
+  div.style.backgroundColor="transparent";
+  return (div);
+}
+// ]]>
+</script>
+<title>제목없음</title>
+
+<style>/* Start https://www.cursors-4u.com */ * {cursor: url(https://ani.cursors-4u.net/symbols/sym-8/sym752.cur), auto !important;} /* End https://www.cursors-4u.com */
+
+</style>
+
+<style type="text/css" id="NamoSE__GeneralStyle"> body{font-family: "Hi Melody", sans-serif; color : #000000; font-size : 10pt; word-Wrap : break-word; margin: 7px 7px 0 7px;} p,li{line-height:1.2;  word-wrap: break-word; margin-top:0; margin-bottom:0;} body{overflow:auto;} body{cursor:auto;} html{cursor: default;}.NamoSE_layoutlock_show { word-break: break-all;}
+
+*{ margin: 0; padding: 0; }
+
+img { width: 100vw; }
+
+.snow_wrap .snow_div {
+
+  position: fixed;
+
+  top: -10%;
+
+  z-index: 9999;
+
+  color: #ffe4e1;
+
+  text-shadow : 0 0 5px rgba(0, 0, 0, 0.25);
+
+  animation: snow_shake 3s ease-in-out infinite;  
+
+  user-select: none;
+
+}
+
+.snow_wrap .snow_div p { animation: snow_fall 10s linear infinite; }
+
+.snow_wrap .snow_div:nth-of-type(0) { left: 0%; animation-delay: 0s; }
+
+.snow_wrap .snow_div:nth-of-type(0) p { animation-delay: 0s; }
+
+.snow_wrap .snow_div:nth-of-type(1) { left: 10%; animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(1) p { animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(2) { left: 20%; animation-delay: 0.5s; }
+
+.snow_wrap .snow_div:nth-of-type(2) p { animation-delay: 6s; }
+
+.snow_wrap .snow_div:nth-of-type(3) { left: 30%; animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(3) p { animation-delay: 4s; }
+
+.snow_wrap .snow_div:nth-of-type(4) { left: 40%; animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(4) p { animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(5) { left: 50%; animation-delay: 3s; }
+
+.snow_wrap .snow_div:nth-of-type(5) p { animation-delay: 8s; }
+
+.snow_wrap .snow_div:nth-of-type(6) { left: 60%; animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(6) p { animation-delay: 6s; }
+
+.snow_wrap .snow_div:nth-of-type(7) { left: 70%; animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(7) p { animation-delay: 2.5s; }
+
+.snow_wrap .snow_div:nth-of-type(8) { left: 80%; animation-delay: 0s; }
+
+.snow_wrap .snow_div:nth-of-type(8) p { animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(9) { left: 90%; animation-delay: 1.5s; }
+
+.snow_wrap .snow_div:nth-of-type(9) p { animation-delay: 3s; }
+
+.snow_wrap .snow_div:nth-of-type(10) { left: 25%; animation-delay: 0.5s; }
+
+.snow_wrap .snow_div:nth-of-type(10) p { animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(11) { left: 65%; animation-delay: 2.5s; }
+
+.snow_wrap .snow_div:nth-of-type(11) p { animation-delay: 4s; }
+
+.snow_wrap .snow_div:nth-of-type(12) { left: 85%; animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(12) p { animation-delay: 7.5s; }
+
+.snow_wrap .snow_div:nth-of-type(13) { left: 5%; animation-delay: 0s; }
+
+.snow_wrap .snow_div:nth-of-type(13) p { animation-delay: 2.5s; }
+
+.snow_wrap .snow_div:nth-of-type(14) { left: 45%; animation-delay: 1.5s; }
+
+.snow_wrap .snow_div:nth-of-type(14) p { animation-delay: 3.5s; }
+
+.snow_wrap .snow_div:nth-of-type(15) { left: 75%; animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(15) p { animation-delay: 2s; }
+
+.snow_wrap .snow_div:nth-of-type(16) { left: 35%; animation-delay: 2.5s; }
+
+.snow_wrap .snow_div:nth-of-type(16) p { animation-delay: 4.5s; }
+
+.snow_wrap .snow_div:nth-of-type(17) { left: 15%; animation-delay: 1s; }
+
+.snow_wrap .snow_div:nth-of-type(17) p { animation-delay: 3s; }
+
+.snow_wrap .snow_div:nth-of-type(18) { left: 95%; animation-delay: 0s; }
+
+.snow_wrap .snow_div:nth-of-type(18) p { animation-delay: 2s; }
+
+@keyframes snow_shake {
+
+  0% {
+
+    transform: translateX(0px);
+
+  }
+
+  50% {
+
+    transform: translateX(80px);
+
+  }
+
+  100% {
+
+    transform: translateX(0px);
+
+  }
+
+}
+
+@keyframes snow_fall {
+
+  0% {
+
+    transform: translateY(0vh);
+
+  }
+
+  100% {
+
+    transform: translateY(110vh);
+
+  }
+
+}
+
+</style>
+
+<style>@import url('https://fonts.googleapis.com/css2?family=Hi+Melody&display=swap');
+
+.hi-melody-regular {
+
+  font-family: "Hi Melody", sans-serif;
+
+  font-weight: 400;
+
+  font-style: normal;
+
+}
+
+body {
+
+  width: 100%;  
+
+  height: 100%;
+
+  background: #FFE4E1;
+
+  -webkit-font-smoothing: antialiased;
+
+  justify-content: center;
+
+  align-items: center;
+
+}
+
+h1 {
+
+  height: 100px;
+
+}
+
+h1 span {
+
+  position: relative;
+
+  top: 10px;
+
+  animation: bounce .4s ease infinite alternate;
+
+  font-family: "Hi Melody", sans-serif;
+
+  font-size: 60px;
+
+  color: #FFF;
+
+  text-shadow: 0 1px 0 #CCC,
+
+               0 2px 0 #CCC,
+
+               0 3px 0 #CCC,
+
+               0 4px 0 #CCC,
+
+               0 5px 0 #CCC,
+
+               0 6px 0 transparent,
+
+               0 7px 0 transparent,
+
+               0 8px 0 transparent,
+
+               0 9px 0 transparent,
+
+               0 10px 10px rgba(0, 0, 0, .4);
+
+}
+
+h1 span:nth-child(2) { animation-delay: .1s; }
+
+h1 span:nth-child(3) { animation-delay: .2s; }
+
+h1 span:nth-child(4) { animation-delay: .3s; }
+
+h1 span:nth-child(5) { animation-delay: .4s; }
+
+h1 span:nth-child(6) { animation-delay: .5s; }
+
+h1 span:nth-child(7) { animation-delay: .6s; }
+
+h1 span:nth-child(8) { animation-delay: .7s; }
+
+h1 span:nth-child(9) { animation-delay: .8s; }
+
+h1 span:nth-child(10) { animation-delay: .9s; }
+
+h1 span:nth-child(11) { animation-delay: .10s; }
+
+h1 span:nth-child(12) { animation-delay: .11s; }
+
+h1 span:nth-child(13) { animation-delay: .12s; }
+
+h1 span:nth-child(14) { animation-delay: .13s; }
+
+h1 span:nth-child(15) { animation-delay: .14s; }
+
+@keyframes bounce {
+
+  100% {
+
+    top: -10px;
+
+    text-shadow: 0 1px 0 #ccc,
+
+                 0 2px 0 #CCC,
+
+                 0 3px 0 #CCC,
+
+                 0 4px 0 #CCC,
+
+                 0 5px 0 #CCC,
+
+                 0 6px 0 #CCC,
+
+                 0 7px 0 #CCC,
+
+                 0 8px 0 #CCC,
+
+                 0 9px 0 #CCC,
+
+                 0 50px 25px rgba(0, 0, 0, .2);
+
+  }
+
+}
+
+</style>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<style type="text/css" id="NamoSE__ParagraphTagStyle">p:not(.ce_exstyle){font-size:;font-family:10pt;line-height:1.2;} td{font-family:''; font-size:10pt;} h1,h2,h3,h4,h5,h6{font-family:'';}
+
+</style>
+
+
+
+
+
+</head>
+
+<body style="overflow-x: hidden">
+
+<p><br /></p>
+
+<p><br /></p>
+
+<p><br /></p>
+
+<p><br /></p>
+
+<div class="snow_wrap">
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div>
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div>
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div>
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div>
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div>
+
+<div class="snow_div">
+
+<p>🍂</p></div>
+
+<div class="snow_div">
+
+<p>🍁</p></div>
+
+<div class="snow_div">
+
+<p>💕</p></div></div>
+
+<p><br /></p>
+
+<p><br /></p>
+
+<p><br />
+
+<br /></p>
+
+<p><br /></p>
+
+<p><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<h1 style="text-align: center;"> <span>🎉</span> <span>결</span> <span>혼</span> <span>을</span> <span>축</span> <span>하</span> <span>합</span> <span>니</span> <span>다</span> <span>~</span> <span>🎉</span> </h1>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br />
+
+<span style="font-size: 18pt;">🤵&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; 👰</span></p>
+
+<p style="text-align:center"><span style="font-size: 18pt;"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight: bold; font-size: 20pt;">정 진 영&nbsp; |&nbsp; 윤&nbsp;현 선<br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><span style="color: rgb(0, 0, 0); font-family: &quot;Hi Melody&quot;, sans-serif; font-size: 14pt; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 700; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 228, 225); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;">💍</span><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-weight:bold"><br /></span></p>
+
+<p style="text-align:center"><span style="font-size: 12pt; font-weight: bold;">2024. 10. 20 <span style="color: rgb(255, 0, 0);">일</span>요일 오후 12시</span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><span style="font-weight: bold;">영도 피아크 6F 스카이 브릿지</span></span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><br /></span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><br /></span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><br /></span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><span style="font-weight: bold;">행복한 순간을 함께 축복해주시면 감사하겠습니다.</span></span></p>
+
+<p style="text-align:center"><span style="font-size:12pt"><br /></span></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p style="text-align:center"><br /></p>
+
+<p align="middle"><iframe src="https://makedear.com/mcard/view/T6i7sbZ" frameborder="0" style="width: 440px; height: 7590px; vertical-align: baseline;">
+  
+<p style="text-align: center;"><br  /></p></iframe></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><span style="color: rgb(0, 0, 0); font-family: &quot;Hi Melody&quot;, sans-serif; font-size: 12pt; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 228, 225); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important; font-weight: bold;">사우님들의 축복 속에서 행복한 결혼생활의 첫걸음을 내딛길 바랍니다</span></p>
+
+<p align="middle"><span style="color: rgb(0, 0, 0); font-family: &quot;Hi Melody&quot;, sans-serif; font-size: 12pt; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 228, 225); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important; font-weight: bold;"><br /></span></p>
+
+<p align="middle"><span style="color: rgb(0, 0, 0); font-family: &quot;Hi Melody&quot;, sans-serif; font-size: 12pt; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 228, 225); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important; font-weight: bold;">결혼 축하드립니다~!</span></p>
+
+<p align="middle"><span style="color:rgb(0, 0, 0);font-family:&quot;Hi Melody&quot;, sans-serif;font-size:10pt;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-weight:400;letter-spacing:normal;orphans:2;text-align:center;text-indent:0px;text-transform:none;widows:2;word-spacing:0px;-webkit-text-stroke-width:0px;white-space:normal;background-color:rgb(255, 228, 225);text-decoration-thickness:initial;text-decoration-style:initial;text-decoration-color:initial;float:none;display:inline !important"><br /></span></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+<p align="middle"><br /></p>
+
+</body>
+
+</html>
